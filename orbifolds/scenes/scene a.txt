@@ -1,0 +1,19 @@
+[Scene][Sample Scene]
+longitude -80.6077
+latitude 28.3922
+
+[Lighting]
+color 000000A24EFEEF44
+ambiant 000000A24EFEEF50
+
+[Camera]
+fov=90
+near clipping plane=0.1
+far clipping plane=1000
+
+[Model][rocket]
+path models/electron/scene.gltf
+position 000000A24EFEF0EC
+rotation 000000A24EFEF0F8
+scale 000000A24EFEF0E0
+
