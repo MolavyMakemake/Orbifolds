@@ -1,14 +1,13 @@
 #include <string>
 #include <GLFW/glfw3.h>
 
-namespace application {
-	void input_submitChar(unsigned int codepoint);
-	void input_submitAction(int key, int scancode, int action, int mods);
-
-	void input_poll();
-}
-
 namespace window {
+	inline int input_dx;
+	inline int input_dy;
+
+	inline void input_clear() {
+	}
+
 	void charCallback(GLFWwindow* glfwWindow, unsigned int codepoint);
 	void onKeyAction(GLFWwindow* glfwWindow, int key, int scancode, int action, int mods);
 }

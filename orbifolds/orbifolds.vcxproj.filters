@@ -40,16 +40,7 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>source\window\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>source\window\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="PostProcessing.cpp">
-      <Filter>source\window\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>source\window\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Skybox.cpp">
       <Filter>source\window\rendering</Filter>
     </ClCompile>
     <ClCompile Include="glad.c" />
@@ -57,14 +48,8 @@
     <ClCompile Include="window.cpp">
       <Filter>source\window</Filter>
     </ClCompile>
-    <ClCompile Include="application.cpp">
-      <Filter>source\application</Filter>
-    </ClCompile>
     <ClCompile Include="gui.cpp">
       <Filter>source\window\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>source\window\rendering</Filter>
     </ClCompile>
     <ClCompile Include="input.cpp">
       <Filter>source</Filter>
@@ -104,9 +89,6 @@
     <ClInclude Include="imgui\imstb_truetype.h">
       <Filter>Dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="Cubemap.h">
-      <Filter>header\window\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>header\window\rendering</Filter>
     </ClInclude>
@@ -116,16 +98,7 @@
     <ClInclude Include="Mesh.h">
       <Filter>header\window\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>header\window\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="PostProccessing.h">
-      <Filter>header\window\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>header\window\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Skybox.h">
       <Filter>header\window\rendering</Filter>
     </ClInclude>
     <ClInclude Include="Diagnostics.h">
@@ -137,14 +110,8 @@
     <ClInclude Include="Core.h">
       <Filter>header\window\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>header\window\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="gui.h">
       <Filter>header\window</Filter>
-    </ClInclude>
-    <ClInclude Include="application.h">
-      <Filter>header\application</Filter>
     </ClInclude>
     <ClInclude Include="window.h">
       <Filter>header\window</Filter>

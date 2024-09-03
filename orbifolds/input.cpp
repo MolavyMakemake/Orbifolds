@@ -1,63 +1,37 @@
 #include "window.h"
 #include "input.h"
-#include "application.h"
 #include <iostream>
+#include <bitset>
 
+typedef unsigned char byte;
 
 namespace window {
+
+	std::bitset<4> key_bs;
+	
 	void charCallback(GLFWwindow* glfwWindow, unsigned int codepoint) {
-		if (codepoint < 0x80)
-			application::input_submitChar(codepoint);
 	}
 	void onKeyAction(GLFWwindow* glfwWindow, int key, int scancode, int action, int mods) {
-		application::input_submitAction(key, scancode, action, mods);
-	}
-}
-
-namespace application {
-
-	namespace {
-		bool isCharPending = false;
-		bool isActionPending = false;
-
-		unsigned int codepoint;
-		int key, scancode, action, mods;
-
-		void readChar() {
-			
+		switch (key)
+		{
+		case GLFW_KEY_RIGHT:
+			key_bs.set(0, action != GLFW_RELEASE);
+			break;
+		case GLFW_KEY_LEFT:
+			key_bs.set(1, action != GLFW_RELEASE);
+			break;
+		
+		case GLFW_KEY_UP:
+			key_bs.set(2, action != GLFW_RELEASE);
+			break;
+		case GLFW_KEY_DOWN:
+			key_bs.set(3, action != GLFW_RELEASE);
+			break;
+		default:
+			return;
 		}
 
-		void readAction() {
-			if (action == GLFW_RELEASE)
-				return;
-		}
-	}
-
-	void input_poll() {
-		if (isCharPending) {
-			readChar();
-			isCharPending = false;
-		}
-
-		if (isActionPending) {
-			readAction();
-			isActionPending = false;
-		}
-	}
-
-	void input_submitChar(unsigned int _codepoint) {
-		while (isCharPending);
-
-		codepoint	= _codepoint;
-		isCharPending = true;
-	}
-	void input_submitAction(int _key, int _scancode, int _action, int _mods) {
-		while (isActionPending);
-
-		key			= _key;
-		scancode	= _scancode;
-		action		= _action;
-		mods		= _mods;
-		isActionPending = true;
+		input_dx = key_bs.test(0) - key_bs.test(1);
+		input_dy = key_bs.test(2) - key_bs.test(3);
 	}
 }

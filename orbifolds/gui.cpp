@@ -1,5 +1,4 @@
 #include "gui.h"
-#include "application.h"
 #define CLOCK_GRAPH_UPDATE_FREQUENCY CLOCKS_PER_SEC * GRAPH_TIMESPAN_MS / (GRAPH_RESOLUTION * 1000)
 
 
@@ -21,5 +20,13 @@ namespace window {
 
 		draw_list->AddRectFilled(pos_sp, pos_sp + size, color);
 		ImGui::SetCursorPos(cursor_wp);
+	}
+
+	void gui_main() {
+		ImGui::Begin("gui");
+
+		ImGui::Text("Iteration: 0");
+		
+		ImGui::End();
 	}
 }

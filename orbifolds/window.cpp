@@ -3,7 +3,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
-#include "application.h"
 #include "Shader.h"
 #include "Framebuffer.h"
 #include "implot/implot.h"
@@ -22,6 +21,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <stb/stb_image.h>
+#include "Mesh.h"
 
 
 namespace window {
@@ -78,11 +79,29 @@ namespace window {
         ImGui_ImplGlfw_InitForOpenGL(glfwWindow1, true);
         ImGui_ImplOpenGL3_Init("#version 430");
 
+        Mesh mesh(MESH_RECTANGLE, 20, 20);
+        Shader shader("shader.vert", "shader.frag");
+        Camera camera;
+        
+        camera.Bake(window1_width, window1_height);
+        shader.Activate();
+        glUniformMatrix4fv(shader.Loc("camera"), 1, GL_FALSE, glm::value_ptr(camera.mat));
+
         Diagnostics<1> diagnostics(500);
         glClearColor(0, 0, 0, 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         while (!glfwWindowShouldClose(glfwWindow1)) {
             diagnostics[0]++;
             diagnostics.tick();
+
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            if (input_dx || input_dy) {
+                camera.rotate(0.04f * glm::vec3(input_dx, input_dy, 0));
+                camera.Bake(window1_width, window1_height);
+                glUniformMatrix4fv(shader.Loc("camera"), 1, GL_FALSE, glm::value_ptr(camera.mat));
+            }
+            mesh.Draw();
 
             // Draw GUI
             // --------
@@ -91,12 +110,13 @@ namespace window {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            glClear(GL_COLOR_BUFFER_BIT);
+            gui_main();
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             // -
 
+            input_clear();
             glfwSwapBuffers(glfwWindow1);
             glfwPollEvents();
         }

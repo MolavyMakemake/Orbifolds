@@ -64,7 +64,6 @@ void Shader::SetLight(Camera& camera, LightingSettings lightingSettings) {
 	glUniform1f(Loc("scene_ambiant"), lightingSettings.scene_ambiant);
 	glUniform3fv(Loc("light_normal"), 1, (float*)&lightingSettings.light_normal);
 	glUniform3fv(Loc("light_color"), 1, (float*)&lightingSettings.light_color);
-	glUniform3fv(Loc("viewPos"), 1, (float*)&camera.position);
 }
 
 GLuint Shader::Loc(const char* name) {

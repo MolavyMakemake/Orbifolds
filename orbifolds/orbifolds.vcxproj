@@ -143,15 +143,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="application.cpp" />
     <ClCompile Include="Framebuffer.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="rs232.cpp" />
     <ClCompile Include="input.cpp" />
-    <ClCompile Include="PostProcessing.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="window.cpp" />
-    <ClInclude Include="application.h" />
     <ClInclude Include="colors.h" />
     <ClInclude Include="Core.h" />
     <ClCompile Include="glad.c" />
@@ -166,10 +163,7 @@
     <ClCompile Include="implot\implot_items.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClInclude Include="Diagnostics.h" />
     <ClInclude Include="Framebuffer.h" />
@@ -195,8 +189,6 @@
     <None Include="starmap.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cubemap.h" />
-    <ClInclude Include="PostProccessing.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -210,10 +202,7 @@
     <ClInclude Include="implot\implot.h" />
     <ClInclude Include="implot\implot_internal.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="Skybox.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Libraries\lib\assimp-vc143-mtd.lib" />

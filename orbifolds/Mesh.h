@@ -13,8 +13,8 @@
 
 struct Vertex {
 	glm::vec3 position;
-	glm::vec3 normal;
 	glm::vec2 texCoords;
+	glm::vec2 value;
 };
 
 struct Texture {
@@ -23,17 +23,21 @@ struct Texture {
 	std::string path;
 };
 
+enum MESH_ {
+	MESH_RECTANGLE
+};
 
 class Mesh {
 public:
 	std::vector<Vertex> vertices;
-	std::vector<GLuint> indices;
-	std::vector<Texture> textures;
+	std::vector<GLuint> triangles;
+	Texture texture;
 
 	glm::mat4 matrix;
 
 	Material material;
 
+	Mesh(MESH_ domain, int res_x, int res_y);
 	Mesh(
 		const std::vector<Vertex>& vertices,
 		const std::vector<GLuint>& indices,
@@ -41,11 +45,12 @@ public:
 	
 	void RecalculateNormals();
 
-	void Draw(Shader& shader, Camera& camera);
+	void Draw();
 	void Delete();
 
 private:
 	GLuint VAO, VBO, EBO;
 
+	void init_rectangle(int res_x, int res_y);
 	void Generate();
 };
