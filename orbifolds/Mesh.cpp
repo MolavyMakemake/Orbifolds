@@ -40,6 +40,11 @@ void Mesh::Generate() {
     glBindVertexArray(0);
 }
 
+void Mesh::Update() {
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), &vertices[0]);
+}
+
 void Mesh::Draw() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture.id);
@@ -55,15 +60,19 @@ void Mesh::Delete() {
     glDeleteBuffers(1, &EBO);
 }
 
-void Mesh::init_rectangle(int res_x, int res_y) {
+void Mesh::init_rectangle(GLuint res_x, GLuint res_y) {
     vertices.clear();
     vertices.reserve(res_x * res_y);
 
+    identify.clear();
+    identify.reserve(res_x * res_y);
+
     for (float y = 0; y < res_y; y++) {
         for (float x = 0; x < res_x; x++) {
+            identify.push_back(y * res_x + x);
             vertices.push_back(Vertex{ 
                 glm::vec3(2 * x / (res_x - 1) - 1, 2 * y / (res_y - 1) - 1, 0),
-                glm::vec2(x / (res_x), y / (res_y))
+                glm::vec2(x / (res_x - 1), y / (res_y - 1))
             });
         }
     }
@@ -82,17 +91,66 @@ void Mesh::init_rectangle(int res_x, int res_y) {
             triangles.push_back(i + res_x + 1);
         }
     }
-
-    Generate();
 }
 
-Mesh::Mesh(MESH_ domain, int res_x, int res_y) {
+const char hex_arr[] = "0123456789abcdef";
+std::string hex(int i) {
+    return std::string({ 
+        hex_arr[(i & 0x00F0) >> 4], 
+        hex_arr[(i & 0x000F) >> 0] });
+}
+
+Mesh::Mesh(MESH_ domain, GLuint res_x, GLuint res_y) {
     switch (domain)
     {
     case MESH_RECTANGLE:
         init_rectangle(res_x, res_y);
         break;
+
+    case MESH_P1:
+        init_rectangle(res_x, res_y);
+
+        for (GLuint x = 0; x < res_x - 1; x++)
+            identify[res_x * (res_y - 1) + x] = x;
+
+        for (GLuint y = 0; y < res_y - 1; y++)
+            identify[res_x - 1 + y * res_x] = y * res_x;
+
+        identify[res_x * res_y - 1] = 0;
+
+        break;
+
     default:
         break;
+    }
+
+    for (float y = 0; y < res_y; y++) {
+        for (float x = 0; x < res_x; x++) {
+            std::cout << hex(identify[y * res_x + x]) << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    Generate();
+}
+
+glm::vec3 moveTowards(glm::vec3 to, glm::vec3 from, float step) {
+    glm::vec3 dpos = to - from;
+    float distance = glm::length(dpos);
+
+    return from + dpos * fmin(step / distance, 1.f);
+}
+
+void Mesh::iterate(float dt) {
+    //for (int i = 0; i < triangles.size(); i += 3) {
+    //
+    //}
+
+    for (int i = 0; i < identify.size(); i++) {
+        int j = identify[i];
+        if (i == j)
+            continue;
+
+        vertices[i].position = moveTowards(vertices[j].position, vertices[i].position + glm::vec3(0, 0, dt / 2), dt);
     }
 }

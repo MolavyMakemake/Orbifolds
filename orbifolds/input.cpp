@@ -27,6 +27,17 @@ namespace window {
 		case GLFW_KEY_DOWN:
 			key_bs.set(3, action != GLFW_RELEASE);
 			break;
+
+		case GLFW_KEY_SLASH:
+			input_it = action == GLFW_PRESS;
+			break;
+		case GLFW_KEY_PERIOD:
+			input_fwd = action == GLFW_PRESS;
+			break;
+		case GLFW_KEY_COMMA:
+			input_bck = action == GLFW_PRESS;
+			break;
+
 		default:
 			return;
 		}

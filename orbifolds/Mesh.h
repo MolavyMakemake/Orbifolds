@@ -24,33 +24,34 @@ struct Texture {
 };
 
 enum MESH_ {
-	MESH_RECTANGLE
+	MESH_RECTANGLE,
+	MESH_P1
 };
 
 class Mesh {
 public:
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> triangles;
+	std::vector<GLuint> identify;
+
 	Texture texture;
 
-	glm::mat4 matrix;
-
-	Material material;
-
-	Mesh(MESH_ domain, int res_x, int res_y);
+	Mesh(MESH_ domain, GLuint res_x, GLuint res_y);
 	Mesh(
 		const std::vector<Vertex>& vertices,
 		const std::vector<GLuint>& indices,
 		const std::vector<Texture>& textures);
 	
-	void RecalculateNormals();
+	void Update();
 
 	void Draw();
 	void Delete();
 
+	void iterate(float dt);
+
 private:
 	GLuint VAO, VBO, EBO;
 
-	void init_rectangle(int res_x, int res_y);
+	void init_rectangle(GLuint res_x, GLuint res_y);
 	void Generate();
 };

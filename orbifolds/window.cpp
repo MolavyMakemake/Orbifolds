@@ -79,7 +79,7 @@ namespace window {
         ImGui_ImplGlfw_InitForOpenGL(glfwWindow1, true);
         ImGui_ImplOpenGL3_Init("#version 430");
 
-        Mesh mesh(MESH_RECTANGLE, 20, 20);
+        Mesh mesh(MESH_P1 , 20, 20);
         Shader shader("shader.vert", "shader.frag");
         Camera camera;
         
@@ -101,6 +101,12 @@ namespace window {
                 camera.Bake(window1_width, window1_height);
                 glUniformMatrix4fv(shader.Loc("camera"), 1, GL_FALSE, glm::value_ptr(camera.mat));
             }
+
+            if (input_it) {
+                mesh.iterate(0.1);
+                mesh.Update();
+            }
+
             mesh.Draw();
 
             // Draw GUI
