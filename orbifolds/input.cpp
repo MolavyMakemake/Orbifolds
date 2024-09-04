@@ -32,10 +32,11 @@ namespace window {
 			input_it = action == GLFW_PRESS;
 			break;
 		case GLFW_KEY_PERIOD:
-			input_fwd = action == GLFW_PRESS;
+			input_play = std::max<int>(1, input_play << (action == GLFW_PRESS));
+			input_play = std::min<int>(8, input_play);
 			break;
 		case GLFW_KEY_COMMA:
-			input_bck = action == GLFW_PRESS;
+			input_play = input_play >> (action == GLFW_PRESS);
 			break;
 
 		default:

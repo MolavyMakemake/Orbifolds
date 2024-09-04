@@ -13,6 +13,7 @@
 
 struct Vertex {
 	glm::vec3 position;
+	glm::vec3 normal;
 	glm::vec2 texCoords;
 	glm::vec2 value;
 };
@@ -23,16 +24,29 @@ struct Texture {
 	std::string path;
 };
 
+GLuint textureFromFile(const char* path, const std::string& directory, bool gamma=false);
+
+struct spring_t {
+	GLuint i;
+	GLuint j;
+	float length;
+};
+
 enum MESH_ {
 	MESH_RECTANGLE,
-	MESH_P1
+	MESH_P1,
+	MESH_PM
 };
 
 class Mesh {
 public:
+	float k = 0;
+
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> triangles;
 	std::vector<GLuint> identify;
+	std::vector<spring_t> springs;
+	std::vector<float> area;
 
 	Texture texture;
 
