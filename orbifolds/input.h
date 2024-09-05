@@ -1,15 +1,20 @@
+#pragma once
+
 #include <string>
 #include <GLFW/glfw3.h>
 
-namespace window {
-	inline int input_dx;
-	inline int input_dy;
+struct input_t {
+	int dx;
+	int dy;
+	bool it;
+	unsigned int play = 0;
+};
 
-	inline bool input_it;
-	inline unsigned int input_play = 0;
+namespace window {
+	inline input_t input;
 
 	inline void input_clear() {
-		input_it = false;
+		input.it = false;
 	}
 
 	void charCallback(GLFWwindow* glfwWindow, unsigned int codepoint);

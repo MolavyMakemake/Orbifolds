@@ -22,10 +22,12 @@ namespace window {
 		ImGui::SetCursorPos(cursor_wp);
 	}
 
-	void gui_main(Mesh* mesh) {
+	void gui_main(input_t* input, Mesh* mesh) {
 		ImGui::Begin("gui");
 
 		ImGui::Text("Iteration: %d", mesh->iteration);
+
+		ImGui::Text("> %d", input->play);
 
 		if (ImGui::Button("Reset")) {
 			mesh->computeDomain();

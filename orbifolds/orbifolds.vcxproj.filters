@@ -54,6 +54,12 @@
     <ClCompile Include="input.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="mesh_generation.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_init.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -177,9 +183,6 @@
     </Filter>
     <Filter Include="source\window\rendering">
       <UniqueIdentifier>{4506bc89-2ad2-48e7-9556-fdc5499ad018}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\application">
-      <UniqueIdentifier>{302c7659-54f2-4468-94dc-6f58a7130b7f}</UniqueIdentifier>
     </Filter>
     <Filter Include="header\window\rendering">
       <UniqueIdentifier>{7a7cada4-5886-41cf-9a47-1476710ba2b0}</UniqueIdentifier>

@@ -145,6 +145,8 @@
   <ItemGroup>
     <ClCompile Include="Framebuffer.cpp" />
     <ClCompile Include="gui.cpp" />
+    <ClCompile Include="mesh_generation.cpp" />
+    <ClCompile Include="mesh_init.cpp" />
     <ClCompile Include="rs232.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="Camera.cpp" />

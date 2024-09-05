@@ -8,6 +8,7 @@
 #include "colors.h"
 #include "Diagnostics.h"
 #include "Mesh.h"
+#include "input.h"
 
 #define GUI_WINDOW_FLAGS	ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs
 #define GUI_TABLE_FLAGS		ImGuiTableFlags_BordersInner | ImGuiTableFlags_NoPadInnerX
@@ -21,5 +22,5 @@
 namespace window {
 	void gui_drawRect(ImVec2 pos, ImVec2 size, ImU32 color);
 
-	void gui_main(Mesh* mesh);
+	void gui_main(input_t* input, Mesh* mesh);
 };

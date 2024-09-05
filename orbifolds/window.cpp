@@ -79,7 +79,7 @@ namespace window {
         ImGui_ImplGlfw_InitForOpenGL(glfwWindow1, true);
         ImGui_ImplOpenGL3_Init("#version 430");
 
-        Mesh mesh(MESH_PM, 25, 25);
+        Mesh mesh(MESH_PM, 41, 41);
         mesh.texture.id = textureFromFile("rendering/wallpaper.png", "../appdata/");
         Shader shader("shader.vert", "shader.frag");
         Camera camera;
@@ -93,7 +93,7 @@ namespace window {
         glClearColor(0, 0, 0, 0);
         glEnable(GL_DEPTH_TEST);
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         //glPolygonMode(GL_FRONT, GL_FILL);
         while (!glfwWindowShouldClose(glfwWindow1)) {
             diagnostics[0]++;
@@ -101,14 +101,15 @@ namespace window {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (input_dx || input_dy) {
-                camera.rotate(0.04f * glm::vec3(input_dx, input_dy, 0));
+            if (input.dx || input.dy) {
+                camera.rotate(0.04f * glm::vec3(input.dx, input.dy, 0));
                 camera.Bake(window1_width, window1_height);
                 glUniformMatrix4fv(shader.Loc("camera"), 1, GL_FALSE, glm::value_ptr(camera.mat));
             }
 
-            if (input_it || input_play) {
-                mesh.iterate(0.01);
+            if (input.it || input.play) {
+                for (int i = 0; i < std::max<int>(input.play, 1); i++)
+                    mesh.iterate(.1f);
                 mesh.Update();
             }
 
@@ -121,7 +122,7 @@ namespace window {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            gui_main(&mesh);
+            gui_main(&input, &mesh);
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
