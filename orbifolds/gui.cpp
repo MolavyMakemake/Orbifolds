@@ -22,11 +22,31 @@ namespace window {
 		ImGui::SetCursorPos(cursor_wp);
 	}
 
-	void gui_main() {
+	void gui_main(Mesh* mesh) {
 		ImGui::Begin("gui");
 
-		ImGui::Text("Iteration: 0");
-		
+		ImGui::Text("Iteration: %d", mesh->iteration);
+
+		if (ImGui::Button("Reset")) {
+			mesh->computeDomain();
+			mesh->Update();
+		}
+
+		if (ImGui::BeginCombo("##combo", mesh_id[mesh->domain])) // The second parameter is the label previewed before opening the combo.
+		{
+			for (int n = 0; n < IM_ARRAYSIZE(mesh_id); n++)
+			{
+				bool is_selected = (mesh->domain == n); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(mesh_id[n], is_selected)) {
+					mesh->domain = (MESH_)n;
+					mesh->Reset();
+				}
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+			}
+			ImGui::EndCombo();
+		}
+
 		ImGui::End();
 	}
 }

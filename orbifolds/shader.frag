@@ -10,6 +10,9 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = texture(tex, uv) * (max(normal.z, 0) + 0.1);
-    //FragColor.x = abs(value.x);
+    FragColor = texture(tex, uv) * (max(normal.y, 0) + 0.1);
+
+    //float t = clamp(value.x / 5, .3, 1) - 0.3;
+    //float s = (1 - t) * exp(-t);
+    FragColor.x += exp(-value.x);
 }

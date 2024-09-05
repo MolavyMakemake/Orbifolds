@@ -35,17 +35,26 @@ struct spring_t {
 enum MESH_ {
 	MESH_RECTANGLE,
 	MESH_P1,
-	MESH_PM
+	MESH_PM,
+	MESH_CM,
+	MESH_P4,
+};
+
+static const char* mesh_id[] = {
+	"rectangle", "p1", "pm", "cm", "p4"
 };
 
 class Mesh {
 public:
-	float k = 0;
+	MESH_ domain;
+	clock_t iteration;
 
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> triangles;
-	std::vector<GLuint> identify;
+
 	std::vector<spring_t> springs;
+	std::vector<spring_t> edgeSprings;
+
 	std::vector<float> area;
 
 	Texture texture;
@@ -60,12 +69,16 @@ public:
 
 	void Draw();
 	void Delete();
+	void Reset();
 
+	void computeDomain();
 	void iterate(float dt);
+
+	GLuint res_x, res_y;
 
 private:
 	GLuint VAO, VBO, EBO;
 
-	void init_rectangle(GLuint res_x, GLuint res_y);
+	void init_rectangle(GLuint res_x, GLuint res_y, std::vector<GLuint>& identify, std::vector<GLuint>& edge);
 	void Generate();
 };

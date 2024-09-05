@@ -79,7 +79,7 @@ namespace window {
         ImGui_ImplGlfw_InitForOpenGL(glfwWindow1, true);
         ImGui_ImplOpenGL3_Init("#version 430");
 
-        Mesh mesh(MESH_PM , 20, 20);
+        Mesh mesh(MESH_PM, 25, 25);
         mesh.texture.id = textureFromFile("rendering/wallpaper.png", "../appdata/");
         Shader shader("shader.vert", "shader.frag");
         Camera camera;
@@ -121,7 +121,7 @@ namespace window {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            gui_main();
+            gui_main(&mesh);
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
