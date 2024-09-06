@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
-#define P1_RADIUS   .7f
-#define PM_RADIUS   .7f
+#define P1_RADIUS   1.5f
+#define PM_RADIUS   1.2f
 
 const char hex_arr[] = "0123456789abcdef";
 std::string hex(int i) {
@@ -23,7 +23,7 @@ const float pi = 6.2831853f;
 
 float p1_len(float y) { return pi * P1_RADIUS - 4 * glm::cos(pi * y); }
 float p2_len(float y) { return .5f; }
-float pm_len(float y) { return pi * (PM_RADIUS + 2 * y); }
+float pm_len(float y) { return pi * (PM_RADIUS - y / 2); }
 float cm_len(float y) { return 5.f; }
 
 void Mesh::computeDomain() {
@@ -32,6 +32,9 @@ void Mesh::computeDomain() {
 
     iteration = 0;
     GLuint res_x = resolution.x, res_y = resolution.y;
+
+    par.explode = 0;
+    par.pressure = 1;
 
     switch (domain)
     {
@@ -47,6 +50,8 @@ void Mesh::computeDomain() {
         identify[res_x * res_y - 1] = 0;
 
         computeMesh(res_x, res_y, SHAPE_2222, identify, edge, p1_len);
+        par.explode = 0.4f;
+        par.pressure = 4;
         break;
 
     case MESH_PM:
@@ -61,6 +66,8 @@ void Mesh::computeDomain() {
         }
 
         computeMesh(res_x, res_y, SHAPE_2222, identify, edge, pm_len);
+        par.explode = 0.01f;
+        par.pressure = 0.2f;
         break;
 
     case MESH_PG: // Not verified
@@ -84,7 +91,9 @@ void Mesh::computeDomain() {
         for (GLuint y = 0; y < res_y; y++)
             identify[res_x * (res_y - y) - 1] = y * res_x;
 
-        computeMesh(res_x, res_y, SHAPE_2222, identify, edge);
+        computeMesh(res_x, res_y, SHAPE_2222, identify, edge, cm_len);
+        par.explode = 0.01f;
+        par.pressure = 0.2f;
         break;
 
     case MESH_P2: // Not verified
@@ -99,11 +108,13 @@ void Mesh::computeDomain() {
         }
 
         computeMesh(res_x, res_y, SHAPE_2222, identify, edge, p2_len);
+        par.pressure = 0.15f;
         break;
 
     case MESH_PMM:
         identify = arange(res_x * res_y);
         computeMesh(res_x, res_y, SHAPE_2222, identify, edge);
+        par.pressure = 0;
         break;
 
     case MESH_PMG: // Not verified
@@ -114,13 +125,8 @@ void Mesh::computeDomain() {
             identify[res_x * res_y - 1 - x] = res_x * (res_y - 1) + x;
         }
 
-        for (int y = 0; y < res_y; y++) {
-            for (int x = 0; x < res_x; x++)
-                std::cout << identify[y * res_x + x] << " ";
-            std::cout << std::endl;
-        }
-
         computeMesh(res_x, res_y, SHAPE_2222, identify, edge);
+        par.pressure = 0.2f;
         break;
 
     case MESH_PGG: // Not verified
@@ -148,6 +154,8 @@ void Mesh::computeDomain() {
         }
 
         computeMesh(res_x, res_y, SHAPE_442, identify, edge);
+        par.pressure = 0.1f;
+        par.explode = 0.01f;
         break;
     }
 
@@ -158,15 +166,18 @@ void Mesh::computeDomain() {
             identify[res_x * i] = i;
             identify[res_x * (res_x - 1) + i] = (i + 1) * res_x - 1;
         }
-
+        
         identify[res_x * (res_x - 1)] = res_x - 1;
 
-        computeMesh(res_x, res_x, SHAPE_2222, identify, edge);
+        computeMesh(res_x, res_x, SHAPE_RHOMBUS, identify, edge);
+        par.pressure = 0.5f;
+        par.explode = 0.01f;
         break;
 
     case MESH_P3M1:
         identify = arange((res_x + 1) * res_x / 2);
         computeMesh(res_x, res_y, SHAPE_333, identify, edge);
+        par.pressure = 0;
         break;
 
     case MESH_P31M:
@@ -183,6 +194,8 @@ void Mesh::computeDomain() {
         }
 
         computeMesh(res_x, res_y, SHAPE_632, identify, edge);
+        par.pressure = 0.1f;
+        par.explode = 0.001f;
         break;
     }
 
@@ -202,6 +215,7 @@ void Mesh::computeDomain() {
     case MESH_P4M:
         identify = arange((res_x + 1) * res_x / 2);
         computeMesh(res_x, res_y, SHAPE_442, identify, edge);
+        par.pressure = 0;
         break;
 
     case MESH_P4G: // Not verified
@@ -215,6 +229,8 @@ void Mesh::computeDomain() {
         }
 
         computeMesh(res_x, res_y, SHAPE_442, identify, edge);
+        par.pressure = 0.1f;
+        par.explode = 0.001f;
         break;
     }
 
@@ -239,21 +255,17 @@ void Mesh::computeDomain() {
             identify[j] = i;
         }
 
-        i = 0;
-        for (int y = 0; y < res_x; y++) {
-            for (int x = 0; x < res_x - y; x++)
-                std::cout << hex(identify[i++]) << " ";
-
-            std::cout << std::endl;
-        }
-
         computeMesh(res_x, res_y, SHAPE_632, identify, edge);
+        par.pressure = 0.3f;
+        par.explode = 0.01f;
         break;
     }
 
     case MESH_P6M:
         identify = arange((res_x + 1) * res_x / 2);
         computeMesh(res_x, res_y, SHAPE_632, identify, edge);
+        par.pressure = 0;
+        break;
 
     default:
         break;

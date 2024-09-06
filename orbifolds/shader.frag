@@ -14,5 +14,5 @@ void main()
 
     //float t = clamp(value.x / 5, .3, 1) - 0.3;
     //float s = (1 - t) * exp(-t);
-    FragColor.x += exp(-value.x) * 0.1;
+    FragColor = vec4(value.x, 0, 0.5, 0);
 }

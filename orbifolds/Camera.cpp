@@ -4,7 +4,7 @@
 
 void Camera::Bake(int width, int height) {
 
-	glm::vec4 pos = glm::eulerAngleYX(euler.x, euler.y) * glm::vec4(0, 0, 5, 0);
+	glm::vec4 pos = glm::eulerAngleYX(euler.x, euler.y) * glm::vec4(0, 0, radius, 0);
 
 	view = glm::lookAt(glm::vec3(pos), target, glm::vec3(0, 1, 0));
 	proj = glm::perspective(glm::radians(fov / 2), (float)width / height, nearClippingPlane, farClippingPlane);

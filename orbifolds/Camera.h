@@ -10,6 +10,8 @@ struct Camera {
 	float exposure = 1;
 	float gamma = 1;
 
+	float radius = 5;
+
 	glm::vec3 euler = glm::vec3(0, 0, 0);
 	glm::vec3 target = glm::vec3(0);
 

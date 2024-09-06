@@ -17,6 +17,24 @@ void Mesh::computeMesh(GLuint res_x, GLuint res_y, SHAPE_ shape,
     case SHAPE_632:
         init632(res_x, identify, edge);
         break;
+    case SHAPE_RHOMBUS: 
+    {
+        init2222(res_x, res_x, identify, edge, _len);
+        float phi = 1.118034f;
+        for (Vertex& v : vertices) {
+            v.position.x = phi * v.position.x + .5f * v.position.y;
+        }
+
+        for (float& a : area)
+            a *= (phi + .5f);
+
+        float psi = 1.345f;
+        for (spring_t& s : springs) {
+            bool d3 = (s.i / res_x) != (s.j / res_x) && (s.i % res_x) != (s.j % res_x);
+            s.length = d3 ? psi * s.length : phi * s.length;
+        }
+        break;
+    }
     default:
         break;
     }
@@ -77,8 +95,8 @@ void Mesh::init2222(GLuint res_x, GLuint res_y,
 
         for (GLuint x = 0; x < res_x - 1; x++) {
             GLuint _i = y * res_x + x;
-            float t = x / (res_x - 1.f);
-            float u = t * (s2 - s1);
+            float t = 2.f * x / (res_x - 1.f) - 1;
+            float u = (t + dx) * (s2 - s1);
             float v = s2 * (t + dx) - s1 * t;
             float d2 = glm::sqrt(u * u + dy * dy);
             float d3 = glm::sqrt(v * v + dy * dy);
@@ -89,12 +107,12 @@ void Mesh::init2222(GLuint res_x, GLuint res_y,
             triangles.push_back(i);
             triangles.push_back(j);
             triangles.push_back(l);
-            area.push_back(d1 * d2 / 2);
+            area.push_back(d1 * dy / 2);
 
             triangles.push_back(i);
             triangles.push_back(l);
             triangles.push_back(k);
-            area.push_back(d1 * d2 / 2);
+            area.push_back(d1 * dy / 2);
 
             springs.push_back(spring_t{ k, l, d1 });
             springs.push_back(spring_t{ j, l, d2 });
@@ -202,6 +220,8 @@ void Mesh::init442(GLuint res, std::vector<GLuint>& identify, std::vector<GLuint
     float d2 = glm::sqrt(s) / (res - 1);
     float d3 = glm::sqrt(4 - 4 * _shift + s) / (res - 1);
 
+    float A = _stretch * d1 * d1 / 2.f;
+
     int it = 0;
     for (GLuint y = 0; y < res - 1; y++, it++) {
         for (GLuint x = 0; x < res - y - 1; x++, it++) {
@@ -225,12 +245,12 @@ void Mesh::init442(GLuint res, std::vector<GLuint>& identify, std::vector<GLuint
             triangles.push_back(i);
             triangles.push_back(j);
             triangles.push_back(l);
-            area.push_back(d1 * d2 / 2);
+            area.push_back(A);
 
             triangles.push_back(i);
             triangles.push_back(l);
             triangles.push_back(k);
-            area.push_back(d1 * d2 / 2);
+            area.push_back(A);
 
             springs.push_back(spring_t{ i, j, d1 });
             springs.push_back(spring_t{ i, k, d2 });

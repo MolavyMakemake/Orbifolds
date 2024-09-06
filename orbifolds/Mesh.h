@@ -32,8 +32,13 @@ struct spring_t {
 	float length;
 };
 
+struct param_t {
+	float explode = 0;
+	float pressure = 1;
+};
+
 enum SHAPE_ {
-	SHAPE_2222, SHAPE_333, SHAPE_442, SHAPE_632
+	SHAPE_2222, SHAPE_333, SHAPE_442, SHAPE_632, SHAPE_RHOMBUS
 };
 
 enum MESH_ {
@@ -66,6 +71,7 @@ public:
 	std::vector<float> area;
 
 	Texture texture;
+	param_t par;
 
 	Mesh(MESH_ domain, GLuint res_x, GLuint res_y);
 	Mesh(

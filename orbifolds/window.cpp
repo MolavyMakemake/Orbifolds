@@ -101,8 +101,9 @@ namespace window {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (input.dx || input.dy) {
+            if (input.dx || input.dy || input.dz) {
                 camera.rotate(0.04f * glm::vec3(input.dx, input.dy, 0));
+                camera.radius += 0.04f * input.dz;
                 camera.Bake(window1_width, window1_height);
                 glUniformMatrix4fv(shader.Loc("camera"), 1, GL_FALSE, glm::value_ptr(camera.mat));
             }

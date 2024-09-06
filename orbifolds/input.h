@@ -6,6 +6,7 @@
 struct input_t {
 	int dx;
 	int dy;
+	int dz;
 	bool it;
 	unsigned int play = 0;
 };

@@ -7,7 +7,7 @@ typedef unsigned char byte;
 
 namespace window {
 
-	std::bitset<4> key_bs;
+	std::bitset<6> key_bs;
 	
 	void charCallback(GLFWwindow* glfwWindow, unsigned int codepoint) {
 	}
@@ -28,6 +28,13 @@ namespace window {
 			key_bs.set(3, action != GLFW_RELEASE);
 			break;
 
+		case GLFW_KEY_RIGHT_SHIFT:
+			key_bs.set(4, action != GLFW_RELEASE);
+			break;
+		case GLFW_KEY_RIGHT_CONTROL:
+			key_bs.set(5, action != GLFW_RELEASE);
+			break;
+
 		case GLFW_KEY_SLASH:
 			input.it = action == GLFW_PRESS;
 			break;
@@ -45,5 +52,6 @@ namespace window {
 
 		input.dx = key_bs.test(0) - key_bs.test(1);
 		input.dy = key_bs.test(2) - key_bs.test(3);
+		input.dz = key_bs.test(4) - key_bs.test(5);
 	}
 }
