@@ -23,7 +23,7 @@ const float pi = 6.2831853f;
 
 float p1_len(float y) { return pi * P1_RADIUS - 4 * glm::cos(pi * y); }
 float p2_len(float y) { return .5f; }
-float pm_len(float y) { return pi * (PM_RADIUS - y / 2); }
+float pm_len(float y) { return pi * PM_RADIUS; }
 float cm_len(float y) { return 5.f; }
 
 void Mesh::computeDomain() {

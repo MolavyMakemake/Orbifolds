@@ -101,11 +101,6 @@ void Mesh::iterate(float dt) {
         v.value.x = 0;
 
     for (spring_t s : springs) {
-        if (s.i == s.j) {
-            //std::cout << "bad spring!" << std::endl;
-            continue;
-        }
-
         glm::vec3 w = vertices[s.i].position - vertices[s.j].position;
         glm::vec3 n = vertices[s.i].normal - vertices[s.j].normal;
 
@@ -144,7 +139,7 @@ void Mesh::iterate(float dt) {
 
         glm::vec3 w = glm::cross(p1 - p0, p2 - p0);
         float A0 = glm::length(w) / 2.f;
-        glm::vec3 n = 2.f / A0 * w;
+        glm::vec3 n = .5f / A0 * w;
 
         normals_v[triangles[3 * i]] += n;
         normals_v[triangles[3 * i + 1]] += n;
@@ -164,9 +159,9 @@ void Mesh::iterate(float dt) {
         //p0 += 0.4f * (1.f + 1.f * glm::exp(-stress_v[triangles[3 * i]])) * dt * w;
         //p1 += 0.4f * (1.f + 1.f * glm::exp(-stress_v[triangles[3 * i + 1]])) * dt * w;
         //p2 += 0.4f * (1.f + 1.f * glm::exp(-stress_v[triangles[3 * i + 2]])) * dt * w;
-        p0 += 0.001f * par.pressure * dt * n;
-        p1 += 0.001f * par.pressure * dt * n;
-        p2 += 0.001f * par.pressure * dt * n;
+        p0 += 0.002f * par.pressure * dt * n;
+        p1 += 0.002f * par.pressure * dt * n;
+        p2 += 0.002f * par.pressure * dt * n;
 
         //vertices[triangles[i]].position += 0.4f * dt * glm::normalize(w);
     }

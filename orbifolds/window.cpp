@@ -72,7 +72,7 @@ namespace window {
         gladLoadGL();
 
         IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
+        auto ctx = ImGui::CreateContext();
         ImGui::StyleColorsDark();
         ImGuiIO& io1 = ImGui::GetIO(); (void)io1;
 
@@ -93,7 +93,7 @@ namespace window {
         glClearColor(0, 0, 0, 0);
         glEnable(GL_DEPTH_TEST);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         //glPolygonMode(GL_FRONT, GL_FILL);
         while (!glfwWindowShouldClose(glfwWindow1)) {
             diagnostics[0]++;
@@ -119,6 +119,7 @@ namespace window {
             // Draw GUI
             // --------
 
+            ImGui::SetCurrentContext(ctx);
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
@@ -129,8 +130,9 @@ namespace window {
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             // -
 
-            input_clear();
             glfwSwapBuffers(glfwWindow1);
+
+            input_clear();
             glfwPollEvents();
         }
 

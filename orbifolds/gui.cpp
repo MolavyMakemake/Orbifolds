@@ -24,7 +24,6 @@ namespace window {
 
 	void gui_main(input_t* input, Mesh* mesh) {
 		ImGui::Begin("gui");
-
 		ImGui::Text("Iteration: %d", mesh->iteration);
 
 		ImGui::Text("> %d", input->play);

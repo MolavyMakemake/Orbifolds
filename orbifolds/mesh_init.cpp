@@ -20,9 +20,10 @@ void Mesh::computeMesh(GLuint res_x, GLuint res_y, SHAPE_ shape,
     case SHAPE_RHOMBUS: 
     {
         init2222(res_x, res_x, identify, edge, _len);
+
         float phi = 1.118034f;
         for (Vertex& v : vertices) {
-            v.position.x = phi * v.position.x + .5f * v.position.y;
+            v.position.x = phi * v.position.x - .5f * v.position.y;
         }
 
         for (float& a : area)
@@ -104,23 +105,32 @@ void Mesh::init2222(GLuint res_x, GLuint res_y,
             GLuint i = vertex_i[_i], j = vertex_i[_i + 1],
                 k = vertex_i[_i + res_x], l = vertex_i[_i + res_x + 1];
 
-            triangles.push_back(i);
-            triangles.push_back(j);
-            triangles.push_back(l);
-            area.push_back(d1 * dy / 2);
+            if (i != j && i != k && j != k) {
+                triangles.push_back(i);
+                triangles.push_back(j);
+                triangles.push_back(l);
+                area.push_back(d1 * dy / 2);
 
-            triangles.push_back(i);
-            triangles.push_back(l);
-            triangles.push_back(k);
-            area.push_back(d1 * dy / 2);
+                springs.push_back(spring_t{ j, l, d2 });
+            }
 
-            springs.push_back(spring_t{ k, l, d1 });
-            springs.push_back(spring_t{ j, l, d2 });
-            springs.push_back(spring_t{ i, l, d3 });
+            if (i != l && i != k && l != k) {
+                triangles.push_back(i);
+                triangles.push_back(l);
+                triangles.push_back(k);
+                area.push_back(d1 * dy / 2);
+
+                springs.push_back(spring_t{ k, l, d1 });
+                springs.push_back(spring_t{ i, l, d3 });
+            }
         }
     }
 
     for (GLuint y = 0; y < res_y - 1; y++) {
+        GLuint i = vertex_i[y * res_x], j = vertex_i[(y + 1) * res_x];
+        if (i == j)
+            continue;
+
         float t = y / (res_y - 1.f);
         float ds = _len(y + dy) - _len(y);
         springs.push_back(spring_t{ vertex_i[y * res_x], vertex_i[(y + 1) * res_x], 
@@ -128,8 +138,13 @@ void Mesh::init2222(GLuint res_x, GLuint res_y,
     }
 
     float d1_0 = _len(0) * dx;
-    for (GLuint x = 0; x < res_x - 1; x++)
+    for (GLuint x = 0; x < res_x - 1; x++) {
+        GLuint i = vertex_i[x], j = vertex_i[x + 1];
+        if (i == j)
+            continue;
+
         springs.push_back(spring_t{ vertex_i[x], vertex_i[x + 1], d1_0 });
+    }
 
     // this part is not quite right
     edgeSprings.clear();

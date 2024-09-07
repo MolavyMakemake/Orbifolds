@@ -40,7 +40,7 @@ namespace window {
 			break;
 		case GLFW_KEY_PERIOD:
 			input.play = std::max<int>(1, input.play << (action == GLFW_PRESS));
-			input.play = std::min<int>(8, input.play);
+			input.play = std::min<int>(32, input.play);
 			break;
 		case GLFW_KEY_COMMA:
 			input.play = input.play >> (action == GLFW_PRESS);
