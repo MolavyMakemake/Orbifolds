@@ -48,6 +48,13 @@ namespace window {
 			ImGui::EndCombo();
 		}
 
+		ImGui::InputFloat("k", &mesh->par.k);
+		ImGui::InputFloat("pressure", &mesh->par.pressure);
+		ImGui::InputFloat("explode", &mesh->par.explode);
+		ImGui::InputFloat("dampening", &mesh->par.dampening);
+		ImGui::InputFloat("smoothing", &mesh->par.smoothing);
+		ImGui::InputFloat("stretch", &mesh->par.stretch);
+
 		ImGui::End();
 	}
 }

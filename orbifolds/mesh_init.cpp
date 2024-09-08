@@ -14,12 +14,33 @@ void Mesh::computeMesh(GLuint res_x, GLuint res_y, SHAPE_ shape,
     case SHAPE_442:
         init442(res_x, identify, _pos);
         break;
+    case SHAPE_662:
+        init662(res_x, identify, _pos);
+        break;
     case SHAPE_632:
         init632(res_x, identify, _pos);
         break;
     default:
         break;
     }
+}
+
+void Mesh::_triangulate(std::vector<GLuint>& identify, GLuint i, GLuint j, GLuint k) {
+    if (identify[i] == identify[j] || identify[i] == identify[k] || identify[j] == identify[k])
+        return;
+
+    glm::vec3 p1 = vertices[j].position - vertices[i].position;
+    glm::vec3 p2 = vertices[k].position - vertices[i].position;
+    glm::vec3 v = glm::normalize(p1 + p2);
+
+    triangles.push_back(identify[i]);
+    triangles.push_back(identify[j]);
+    triangles.push_back(identify[k]);
+    shapes.push_back(shape_t{
+        glm::dot(v, p1),
+        glm::dot(v, p2),
+        glm::length(p1 - v * glm::dot(v, p1))
+        });
 }
 
 void Mesh::init2222(GLuint res_x, GLuint res_y,
@@ -48,38 +69,24 @@ void Mesh::init2222(GLuint res_x, GLuint res_y,
     shapes.clear();
     shapes.reserve(2 * (res_x - 1) * (res_y - 1));
 
+    int i = vertices.size();
     for (GLuint y = 0; y < res_y - 1; y++) {
-        for (GLuint x = 0; x < res_x - 1; x++) {
+        for (GLuint x = 0; x < res_x - 1; x++, i++) {
             GLuint i0 = y * res_x + x, i1 = i0 + 1, i2 = i0 + res_x, i3 = i1 + res_x;
+            glm::vec2 uv = .25f * (vertices[i0].texCoords + vertices[i1].texCoords + vertices[i2].texCoords + vertices[i3].texCoords);
 
-            glm::vec3 p1 = vertices[i1].position - vertices[i0].position;
-            glm::vec3 p2 = vertices[i2].position - vertices[i0].position;
-            glm::vec3 p3 = vertices[i3].position - vertices[i0].position;
+            vertices.push_back(Vertex{
+                _pos(uv.x, uv.y),
+                glm::vec3(0, 0, 1),
+                uv,
+                glm::vec2(0)
+                });
+            identify.push_back(i);
 
-            glm::vec3 v1 = glm::normalize(p1 + p3);
-            glm::vec3 v2 = glm::normalize(p2 + p3);
-
-            if (identify[i0] != identify[i1] && identify[i0] != identify[i3] && identify[i1] != identify[i3]) {
-                triangles.push_back(identify[i0]);
-                triangles.push_back(identify[i1]);
-                triangles.push_back(identify[i3]);
-                shapes.push_back(shape_t{
-                    glm::dot(v1, p1),
-                    glm::dot(v1, p3),
-                    glm::length(p1 - v1 * glm::dot(v1, p1))
-                    });
-            }
-
-            if (identify[i0] != identify[i3] && identify[i0] != identify[i2] && identify[i3] != identify[i2]) {
-                triangles.push_back(identify[i0]);
-                triangles.push_back(identify[i3]);
-                triangles.push_back(identify[i2]);
-                shapes.push_back(shape_t{
-                    glm::dot(v2, p3),
-                    glm::dot(v2, p2),
-                    glm::length(p3 - v2 * glm::dot(v2, p3))
-                    });
-            }
+            _triangulate(identify, i0, i1, i);
+            _triangulate(identify, i1, i3, i);
+            _triangulate(identify, i2, i0, i);
+            _triangulate(identify, i3, i2, i);
         }
     }
 }
@@ -111,53 +118,31 @@ void Mesh::init442(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(f
         for (GLuint x = 0; x < res - y - 1; x++, i0++) {
             GLuint i1 = i0 + 1, i2 = i0 + res - y, i3 = i2 + 1;
 
-            glm::vec3 p1 = vertices[i1].position - vertices[i0].position;
-            glm::vec3 p2 = vertices[i2].position - vertices[i0].position;
+            _triangulate(identify, i0, i1, i2);
 
-            glm::vec3 v1 = glm::normalize(p1 + p2);
-
-            if (identify[i0] != identify[i1] && identify[i0] != identify[i2] && identify[i1] != identify[i2]) {
-                triangles.push_back(identify[i0]);
-                triangles.push_back(identify[i1]);
-                triangles.push_back(identify[i2]);
-                shapes.push_back(shape_t{
-                        glm::dot(v1, p1),
-                        glm::dot(v1, p2),
-                        glm::length(p1 - v1 * glm::dot(v1, p1))
-                    });
-            }
-
-            if (x + 2 < res - y && identify[i1] != identify[i3] && identify[i1] != identify[i2] && identify[i3] != identify[i2]) {
-                p2 -= p1;
-                glm::vec3 p3 = vertices[i3].position - vertices[i1].position;
-                glm::vec3 v2 = glm::normalize(p2 + p3);
-
-                triangles.push_back(identify[i1]);
-                triangles.push_back(identify[i3]);
-                triangles.push_back(identify[i2]);
-
-                shapes.push_back(shape_t{
-                    glm::dot(v2, p3),
-                    glm::dot(v2, p2),
-                    glm::length(p3 - v2 * glm::dot(v2, p3))
-                    });
-
-                continue;
-            }
+            if (x + 2 < res - y)
+                _triangulate(identify, i1, i3, i2);
         }
     }
 }
 
 void Mesh::init333(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float)) {
     auto pos = [](float x, float y) {
-        return glm::vec3(x, y, 0);
+        return glm::vec3(2.f * x - 1 + y, phi * (y - 1 / 3.f), 0);
     };
     init442(res, identify, pos);
 }
 
 void Mesh::init632(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float)) {
     auto pos = [](float x, float y) {
-        return glm::vec3(x, y, 0);
+        return glm::vec3(2.f * x - .5f, phi / 3.f * (y - 1 / 3.f), 0);
+    };
+    init442(res, identify, pos);
+}
+
+void Mesh::init662(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float)) {
+    auto pos = [](float x, float y) {
+        return glm::vec3(x - .5f * y, .75f * y, 0);
     };
     init442(res, identify, pos);
 }

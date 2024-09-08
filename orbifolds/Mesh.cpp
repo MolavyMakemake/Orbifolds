@@ -98,6 +98,94 @@ void Mesh::iterate(float dt) {
     //for (Vertex& v : vertices)
     //    v.position += par.pressure * 0.1f * dt * v.normal;
 
+    std::vector<glm::vec3> forces_v(vertices.size());
+    std::vector<glm::vec3> normals_v(vertices.size());
+    std::vector<int> normals_count(vertices.size());
+
+    for (int T = 0; T < shapes.size(); T++) {
+        glm::vec3 p0 = vertices[triangles[3 * T + 0]].position;
+        glm::vec3 p1 = vertices[triangles[3 * T + 1]].position;
+        glm::vec3 p2 = vertices[triangles[3 * T + 2]].position;
+
+        glm::vec3 v1 = p1 - p0;
+        glm::vec3 v2 = p2 - p0;
+
+        glm::vec3 x = glm::normalize(v1 + v2);
+        glm::vec3 y = glm::normalize(v1 - x * glm::dot(v1, x));
+        glm::vec3 z = glm::cross(y, x);
+
+        if (isnan(y.x))
+            continue;
+
+        // fix normals
+        normals_v[triangles[3 * T + 0]] += z;
+        normals_v[triangles[3 * T + 1]] += z;
+        normals_v[triangles[3 * T + 2]] += z;
+        normals_count[triangles[3 * T + 0]]++;
+        normals_count[triangles[3 * T + 1]]++;
+        normals_count[triangles[3 * T + 2]]++;
+
+        // fix triangles
+        glm::vec3 q1 = shapes[T].l1 * x + shapes[T].w * y - v1;
+        glm::vec3 q2 = shapes[T].l2 * x - shapes[T].w * y - v2;
+        glm::vec3 d = -(q1 + q2) / 3.f;
+
+        // apply forces
+        glm::vec3 a = (shapes[T].l1 + shapes[T].l2) * shapes[T].w * z;
+        forces_v[triangles[3 * T + 0]] += par.k * d + par.pressure * a;
+        forces_v[triangles[3 * T + 1]] += par.k * (q1 + d) + par.pressure * a;
+        forces_v[triangles[3 * T + 2]] += par.k * (q2 + d) + par.pressure * a;
+    }
+
+    std::vector<glm::vec3> position_v(vertices.size());
+    std::vector<int> position_count(vertices.size());
+
+    glm::vec3 barycenter(0);
+
+    for (int T = 0; T < shapes.size(); T++) {
+        glm::vec3 _bc = vertices[triangles[3 * T + 0]].position
+            + vertices[triangles[3 * T + 1]].position
+            + vertices[triangles[3 * T + 2]].position;
+
+        barycenter += _bc;
+        position_v[triangles[3 * T + 0]] += _bc;
+        position_v[triangles[3 * T + 1]] += _bc;
+        position_v[triangles[3 * T + 2]] += _bc;
+        position_count[triangles[3 * T + 0]] += 3;
+        position_count[triangles[3 * T + 1]] += 3;
+        position_count[triangles[3 * T + 2]] += 3;
+    }
+
+    for (int i = 0; i < vertices.size(); i++) {
+        vertices[i].normal = normals_v[i] / (float)normals_count[i];
+        forces_v[i] += par.smoothing * glm::dot(position_v[i] / (float)position_count[i] - vertices[i].position, vertices[i].normal) * vertices[i].normal;
+    }
+
+    for (GLuint e : edge) {
+        glm::vec3 n = vertices[e].position - position_v[e] / (float)position_count[e];
+        forces_v[e] += par.stretch * n;
+    }
+
+    barycenter /= 3.f * (float)shapes.size();
+
+    for (int i = 0; i < vertices.size(); i++) {
+        forces_v[i] -= par.dampening * velocity[i];
+        glm::vec3 v = vertices[i].position - barycenter;
+        float t = glm::max(glm::dot(v, v), .0001f);
+        forces_v[i] += par.explode / t * v;
+
+        velocity[i] = glm::clamp(velocity[i] + dt * forces_v[i], -.1f, .1f);
+        vertices[i].position += dt * velocity[i] - barycenter;
+    }
+}
+
+/*
+void Mesh::iterate(float dt) {
+    iteration++;
+
+    //for (Vertex& v : vertices)
+    //    v.position += par.pressure * 0.1f * dt * v.normal;
+
     std::vector<glm::vec3> normals_v(vertices.size());
     std::vector<int> normals_count(vertices.size());
 
@@ -129,9 +217,9 @@ void Mesh::iterate(float dt) {
         glm::vec3 q2 = shapes[T].l2 * x - shapes[T].w * y - v2;
         glm::vec3 d = -(q1 + q2) / 3.f;
 
-        p0 += d;
-        p1 += (q1 + d);
-        p2 += (q2 + d);
+        p0 += dt * d;
+        p1 += dt * (q1 + d);
+        p2 += dt * (q2 + d);
 
         //std::cout << T << ": " << glm::distance(q1, p1) << ", ";
         //std::cout << glm::distance(q2, p2) << std::endl;
@@ -173,89 +261,6 @@ void Mesh::iterate(float dt) {
         glm::vec3 v = vertices[i].position - barycenter;
         float t = glm::max(glm::dot(v, v), .0001f);
         vertices[i].position = v * (1.f + 2.f * par.explode * dt / t);
-    }
-}
-
-/*
-void Mesh::iterate(float dt) {
-    iteration++;
-
-    glm::vec3 barycenter(0);
-
-    for (Vertex& v : vertices)
-        v.value.x = 0;
-
-    for (spring_t s : springs) {
-        glm::vec3 w = vertices[s.i].position - vertices[s.j].position;
-        glm::vec3 n = vertices[s.i].normal - vertices[s.j].normal;
-
-        float d = s.length / glm::length(w);
-        float a = (1 - d) / 2;
-        float dA = std::min(5 * dt * a, a);
-
-        vertices[s.i].position -= dA * w;
-        vertices[s.j].position += dA * w;
-
-        float curvature = s.length * glm::dot(n, w) / glm::dot(w, w);
-        vertices[s.i].value.x += curvature;
-        vertices[s.j].value.x += curvature;
-    }
-
-    for (spring_t s : edgeSprings) {
-        //vertices[s.i].position += 0.01f * dt / s.length * (vertices[s.i].position - vertices[s.j].position);
-    }
-
-    for (int i = 0; i < vertices.size(); i++) {
-        //vertices[i].position -= 0.001f * dt * vertices[i].value.x * vertices[i].normal;
-        //vertices[i].position += 0.04f * dt * vertices[i].normal;
-        barycenter += vertices[i].position;
-    }
-
-    barycenter /= vertices.size();
-
-    // update normals
-    std::vector<int> normals_count(vertices.size());
-    std::vector<glm::vec3> normals_v(vertices.size());
-
-    for (int i = 0; i < area.size(); i++) {
-        glm::vec3& p0 = vertices[triangles[3 * i]].position;
-        glm::vec3& p1 = vertices[triangles[3 * i + 1]].position;
-        glm::vec3& p2 = vertices[triangles[3 * i + 2]].position;
-
-        glm::vec3 w = glm::cross(p1 - p0, p2 - p0);
-        float A0 = glm::length(w) / 2.f;
-        glm::vec3 n = .5f / A0 * w;
-
-        normals_v[triangles[3 * i]] += n;
-        normals_v[triangles[3 * i + 1]] += n;
-        normals_v[triangles[3 * i + 2]] += n;
-        normals_count[triangles[3 * i]]++;
-        normals_count[triangles[3 * i + 1]]++;
-        normals_count[triangles[3 * i + 2]]++;
-
-        glm::vec3 bc = (p0 + p1 + p2) / 3.f;
-        float dA = area[i] / A0;
-        float dS = glm::sqrt(dA) - 1;
-
-        p0 += 0.2f * dt * dS * (p0 - bc);
-        p1 += 0.2f * dt * dS * (p1 - bc);
-        p2 += 0.2f * dt * dS * (p2 - bc);
-
-        //p0 += 0.4f * (1.f + 1.f * glm::exp(-stress_v[triangles[3 * i]])) * dt * w;
-        //p1 += 0.4f * (1.f + 1.f * glm::exp(-stress_v[triangles[3 * i + 1]])) * dt * w;
-        //p2 += 0.4f * (1.f + 1.f * glm::exp(-stress_v[triangles[3 * i + 2]])) * dt * w;
-        p0 += 0.002f * par.pressure * dt * n;
-        p1 += 0.002f * par.pressure * dt * n;
-        p2 += 0.002f * par.pressure * dt * n;
-
-        //vertices[triangles[i]].position += 0.4f * dt * glm::normalize(w);
-    }
-
-    for (int i = 0; i < vertices.size(); i++) {
-        vertices[i].normal = normals_v[i] / (float)normals_count[i];
-        glm::vec3 v = vertices[i].position - barycenter;
-        float t = glm::dot(v, v);
-        vertices[i].position = v * (1.f + par.explode * dt / t);
     }
 }*/
 

@@ -26,6 +26,9 @@ struct Texture {
 
 GLuint textureFromFile(const char* path, const std::string& directory, bool gamma=false);
 
+const float pi = 6.2831853f;
+const float phi = 1.618034f;
+
 struct shape_t {
 	float l1;
 	float l2;
@@ -33,12 +36,16 @@ struct shape_t {
 };
 
 struct param_t {
+	float k = 2;
+	float dampening = 1.f;
+	float smoothing = 1.f;
 	float explode = 0;
 	float pressure = 1;
+	float stretch = 1;
 };
 
 enum SHAPE_ {
-	SHAPE_2222, SHAPE_333, SHAPE_442, SHAPE_632
+	SHAPE_2222, SHAPE_333, SHAPE_442, SHAPE_662, SHAPE_632
 };
 
 enum MESH_ {
@@ -67,6 +74,7 @@ public:
 	std::vector<GLuint> edge;
 
 	std::vector<shape_t> shapes;
+	std::vector<glm::vec3> velocity;
 
 	Texture texture;
 	param_t par;
@@ -95,10 +103,13 @@ private:
 	void computeMesh(GLuint res_x, GLuint res_y, SHAPE_ shape,
 		std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float) = _pos_id);
 
-	static inline glm::vec3 _pos_id(float x, float y) { return glm::vec3(x, y, 0.f); }
+	static inline glm::vec3 _pos_id(float x, float y) { return glm::vec3(2.f * x - 1.f, 2.f * y - 1, 0.f); }
 
 	void init2222(GLuint res_x, GLuint res_y, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
 	void init333(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
 	void init442(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
 	void init632(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
+	void init662(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
+
+	void _triangulate(std::vector<GLuint>& identify, GLuint i, GLuint j, GLuint k);
 };
