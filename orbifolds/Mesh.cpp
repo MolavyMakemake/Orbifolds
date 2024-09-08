@@ -95,6 +95,91 @@ void debug_v(glm::vec3 w) {
 void Mesh::iterate(float dt) {
     iteration++;
 
+    //for (Vertex& v : vertices)
+    //    v.position += par.pressure * 0.1f * dt * v.normal;
+
+    std::vector<glm::vec3> normals_v(vertices.size());
+    std::vector<int> normals_count(vertices.size());
+
+    for (int T = 0; T < shapes.size(); T++) {
+        glm::vec3& p0 = vertices[triangles[3 * T + 0]].position;
+        glm::vec3& p1 = vertices[triangles[3 * T + 1]].position;
+        glm::vec3& p2 = vertices[triangles[3 * T + 2]].position;
+
+        glm::vec3 v1 = p1 - p0;
+        glm::vec3 v2 = p2 - p0;
+
+        glm::vec3 x = glm::normalize(v1 + v2);
+        glm::vec3 y = glm::normalize(v1 - x * glm::dot(v1, x));
+        glm::vec3 z = glm::cross(y, x);
+
+        if (isnan(y.x))
+            continue;
+
+        // fix normals
+        normals_v[triangles[3 * T + 0]] += z;
+        normals_v[triangles[3 * T + 1]] += z;
+        normals_v[triangles[3 * T + 2]] += z;
+        normals_count[triangles[3 * T + 0]]++;
+        normals_count[triangles[3 * T + 1]]++;
+        normals_count[triangles[3 * T + 2]]++;
+
+        // fix triangles
+        glm::vec3 q1 = shapes[T].l1 * x + shapes[T].w * y - v1;
+        glm::vec3 q2 = shapes[T].l2 * x - shapes[T].w * y - v2;
+        glm::vec3 d = -(q1 + q2) / 3.f;
+
+        p0 += d;
+        p1 += (q1 + d);
+        p2 += (q2 + d);
+
+        //std::cout << T << ": " << glm::distance(q1, p1) << ", ";
+        //std::cout << glm::distance(q2, p2) << std::endl;
+    }
+
+    std::vector<glm::vec3> position_v(vertices.size());
+    std::vector<int> position_count(vertices.size());
+
+    glm::vec3 barycenter(0);
+
+    for (int T = 0; T < shapes.size(); T++) {
+        glm::vec3 _bc = vertices[triangles[3 * T + 0]].position
+                      + vertices[triangles[3 * T + 1]].position 
+                      + vertices[triangles[3 * T + 2]].position;
+
+        barycenter += _bc;
+        position_v[triangles[3 * T + 0]] += _bc;
+        position_v[triangles[3 * T + 1]] += _bc;
+        position_v[triangles[3 * T + 2]] += _bc;
+        position_count[triangles[3 * T + 0]] += 3;
+        position_count[triangles[3 * T + 1]] += 3;
+        position_count[triangles[3 * T + 2]] += 3;
+    }
+
+    for (int i = 0; i < vertices.size(); i++) {
+        vertices[i].normal = normals_v[i] / (float)normals_count[i];
+    }
+
+    for (GLuint e : edge) {
+        glm::vec3& p = vertices[e].position;
+        vertices[e].normal = glm::normalize(p - position_v[e] / (float)position_count[e]);
+    }
+
+    barycenter /= 3.f * (float)shapes.size();
+
+    for (int i = 0; i < vertices.size(); i++) {
+        vertices[i].position += dt * .1f * par.pressure * vertices[i].normal;
+
+        glm::vec3 v = vertices[i].position - barycenter;
+        float t = glm::max(glm::dot(v, v), .0001f);
+        vertices[i].position = v * (1.f + 2.f * par.explode * dt / t);
+    }
+}
+
+/*
+void Mesh::iterate(float dt) {
+    iteration++;
+
     glm::vec3 barycenter(0);
 
     for (Vertex& v : vertices)
@@ -172,91 +257,7 @@ void Mesh::iterate(float dt) {
         float t = glm::dot(v, v);
         vertices[i].position = v * (1.f + par.explode * dt / t);
     }
-}
-
-//void Mesh::_iterate(float dt) {
-//    for (int i = 0; i < identify.size(); i++) {
-//        int j = identify[i];
-//        if (i == j)
-//            continue;
-//
-//        vertices[i].position = moveTowards(vertices[j].position, vertices[i].position + glm::vec3(0, 0, -dt / 2), dt);
-//    }
-//
-//    //for (int i = 0; i < area.size(); i++) {
-//    //    glm::vec3 p0 = vertices[triangles[3 * i]].position;
-//    //    glm::vec3 p1 = vertices[triangles[3 * i + 1]].position;
-//    //    glm::vec3 p2 = vertices[triangles[3 * i + 2]].position;
-//    //             
-//    //    glm::vec3 w = glm::cross(p1 - p0, p2 - p0);
-//    //    float S = area[i] / glm::length(w);
-//    //    std::cout << area[i] << "; " << glm::length(w) << std::endl;
-//    //
-//    //    vertices[triangles[3 * i + 1]].position = p0 + S * (p1 - p0);
-//    //    vertices[triangles[3 * i + 2]].position = p0 + S * (p2 - p0);
-//    //    //vertices[triangles[i]].position += 0.5f * dt * glm::normalize(w);
-//    //}
-//
-//    std::vector<float> stress_v(vertices.size());
-//
-//    for (Vertex& v : vertices)
-//        v.value.x = 0;
-//
-//    for (spring_t s : springs) {
-//        glm::vec3 w = vertices[s.i].position - vertices[s.j].position;
-//        glm::vec3 n = vertices[s.i].normal - vertices[s.j].normal;
-//
-//        float d = s.length / glm::length(w);
-//        float a = (1 - d) / 2;
-//
-//        if (s.i % 20)
-//            vertices[s.i].position -= a * w;
-//
-//        if (s.j % 20)
-//            vertices[s.j].position += a * w;
-//
-//        float curvature = glm::dot(n, w) / glm::dot(w, w);
-//        vertices[s.i].value.x += curvature;
-//        vertices[s.j].value.x += curvature;
-//
-//        stress_v[s.i] += a;
-//        stress_v[s.j] += a;
-//    }
-//
-//    // update normals
-//    std::vector<int> normals_count(vertices.size());
-//    std::vector<glm::vec3> normals_v(vertices.size());
-//
-//    for (int i = 0; i < area.size(); i++) {
-//        glm::vec3 p0 = vertices[triangles[3 * i]].position;
-//        glm::vec3 p1 = vertices[triangles[3 * i + 1]].position;
-//        glm::vec3 p2 = vertices[triangles[3 * i + 2]].position;
-//
-//        glm::vec3 w = glm::cross(p1 - p0, p2 - p0);
-//        glm::vec3 n = glm::normalize(w);
-//
-//        normals_v[triangles[3 * i]] += n;
-//        normals_v[triangles[3 * i + 1]] += n;
-//        normals_v[triangles[3 * i + 2]] += n;
-//        normals_count[triangles[3 * i]]++;
-//        normals_count[triangles[3 * i + 1]]++;
-//        normals_count[triangles[3 * i + 2]]++;
-//
-//        //vertices[triangles[i]].position += 0.4f * dt * glm::normalize(w);
-//    }
-//
-//    for (int i = 0; i < vertices.size(); i++) {
-//        if (identify[i] == i && i > 20 && i % 20 && i < 380)
-//            vertices[i].position += 0.002f * glm::exp(-stress_v[i]) * vertices[i].normal;
-//        
-//        vertices[i].normal = normals_v[i] / (float)normals_count[i];
-//
-//        float t = glm::clamp(vertices[i].value.x / 5.f, .3f, 1.f) - .3f;
-//        float s = .4f * glm::exp(1.f * t) * (1.f - t);
-//        //if (identify[i] == i && i % 20)
-//        //    vertices[i].position += dt * s * vertices[i].normal;
-//    }
-//}
+}*/
 
 GLuint textureFromFile(const char* path, const std::string& directory, bool gamma)
 {

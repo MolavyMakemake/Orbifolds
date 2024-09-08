@@ -26,10 +26,10 @@ struct Texture {
 
 GLuint textureFromFile(const char* path, const std::string& directory, bool gamma=false);
 
-struct spring_t {
-	GLuint i;
-	GLuint j;
-	float length;
+struct shape_t {
+	float l1;
+	float l2;
+	float w;
 };
 
 struct param_t {
@@ -38,7 +38,7 @@ struct param_t {
 };
 
 enum SHAPE_ {
-	SHAPE_2222, SHAPE_333, SHAPE_442, SHAPE_632, SHAPE_RHOMBUS
+	SHAPE_2222, SHAPE_333, SHAPE_442, SHAPE_632
 };
 
 enum MESH_ {
@@ -64,11 +64,9 @@ public:
 
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> triangles;
+	std::vector<GLuint> edge;
 
-	std::vector<spring_t> springs;
-	std::vector<spring_t> edgeSprings;
-
-	std::vector<float> area;
+	std::vector<shape_t> shapes;
 
 	Texture texture;
 	param_t par;
@@ -95,17 +93,12 @@ private:
 	void Generate();
 
 	void computeMesh(GLuint res_x, GLuint res_y, SHAPE_ shape,
-		std::vector<GLuint>& identify, std::vector<GLuint>& edge, float (*_len)(float) = _len_1);
+		std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float) = _pos_id);
 
-	static inline float _len_1(float y) { return 1; }
+	static inline glm::vec3 _pos_id(float x, float y) { return glm::vec3(x, y, 0.f); }
 
-	void init2222(GLuint res_x, GLuint res_y,
-		std::vector<GLuint>& identify, std::vector<GLuint>& edge, float (*_len)(float));
-	void init333(GLuint res,
-		std::vector<GLuint>& identify, std::vector<GLuint>& edge);
-	void init442(GLuint res,
-		std::vector<GLuint>& identify, std::vector<GLuint>& edge, 
-		float _shift = 0, float _stretch = 1);
-	void init632(GLuint res,
-		std::vector<GLuint>& identify, std::vector<GLuint>& edge);
+	void init2222(GLuint res_x, GLuint res_y, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
+	void init333(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
+	void init442(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
+	void init632(GLuint res, std::vector<GLuint>& identify, glm::vec3(*_pos)(float, float));
 };

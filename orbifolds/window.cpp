@@ -34,6 +34,7 @@ namespace window {
         if (window == glfwWindow1) {
             window1_width = width;
             window1_height = height;
+            glViewport(0, 0, width, height);
         }
     }
 
@@ -79,7 +80,7 @@ namespace window {
         ImGui_ImplGlfw_InitForOpenGL(glfwWindow1, true);
         ImGui_ImplOpenGL3_Init("#version 430");
 
-        Mesh mesh(MESH_PM, 41, 41);
+        Mesh mesh(MESH_PM, 25, 25);
         mesh.texture.id = textureFromFile("rendering/wallpaper.png", "../appdata/");
         Shader shader("shader.vert", "shader.frag");
         Camera camera;
@@ -93,7 +94,7 @@ namespace window {
         glClearColor(0, 0, 0, 0);
         glEnable(GL_DEPTH_TEST);
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         //glPolygonMode(GL_FRONT, GL_FILL);
         while (!glfwWindowShouldClose(glfwWindow1)) {
             diagnostics[0]++;
